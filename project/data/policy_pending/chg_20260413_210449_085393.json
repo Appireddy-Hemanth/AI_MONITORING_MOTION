@@ -1,0 +1,65 @@
+{
+  "change_id": "chg_20260413_210449_085393",
+  "requested_by": "qa",
+  "requested_at": "2026-04-13T21:04:49.085393",
+  "policy": {
+    "global": {
+      "cooldown_seconds": 12.0,
+      "intrusion_clear_seconds": 7.0,
+      "gas_threshold": 460.0,
+      "temp_threshold": 43.0,
+      "gas_clear_ratio": 0.9,
+      "temp_clear_delta": 2.0,
+      "normal_after_quiet_seconds": 20.0
+    },
+    "alert_codes": {
+      "INTRUSION": {
+        "cooldown_seconds": 10.0,
+        "min_risk": 0.62,
+        "severity": "high",
+        "confirmation_frames": 2,
+        "escalate_after_seconds": 120.0
+      },
+      "FIRE": {
+        "cooldown_seconds": 6.0,
+        "min_risk": 0.78,
+        "severity": "critical",
+        "confirmation_frames": 1,
+        "escalate_after_seconds": 30.0
+      },
+      "GAS_HIGH": {
+        "cooldown_seconds": 8.0,
+        "min_risk": 0.8,
+        "severity": "critical",
+        "confirmation_frames": 2,
+        "escalate_after_seconds": 90.0
+      },
+      "TEMP_HIGH": {
+        "cooldown_seconds": 8.0,
+        "min_risk": 0.66,
+        "severity": "high",
+        "confirmation_frames": 2,
+        "escalate_after_seconds": 180.0
+      },
+      "NORMAL": {
+        "cooldown_seconds": 30.0,
+        "min_risk": 0.0,
+        "severity": "low",
+        "confirmation_frames": 1,
+        "escalate_after_seconds": 0.0
+      }
+    },
+    "contexts": {
+      "default": {
+        "site": "default-site",
+        "shift": "all",
+        "risk_profile": "normal",
+        "global_overrides": {},
+        "code_overrides": {}
+      }
+    }
+  },
+  "status": "approved",
+  "approved_by": "qa-lead",
+  "approved_at": "2026-04-13T21:04:49.112594"
+}

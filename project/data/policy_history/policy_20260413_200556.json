@@ -1,0 +1,9 @@
+{
+  "cooldown_seconds": 12.0,
+  "intrusion_clear_seconds": 7.0,
+  "gas_threshold": 460.0,
+  "temp_threshold": 43.0,
+  "gas_clear_ratio": 0.9,
+  "temp_clear_delta": 2.0,
+  "normal_after_quiet_seconds": 20.0
+}

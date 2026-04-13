@@ -1,0 +1,16 @@
+.vercel
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.DS_Store
+Thumbs.db
+.env
+project/data/logs/
+project/data/eval/
+project/data/review_bundle/
+project/data/scenarios/
+project/data/incidents/
