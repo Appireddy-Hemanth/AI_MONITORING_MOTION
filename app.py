@@ -206,6 +206,23 @@ def _dashboard_html() -> str:
                                 .range-wrap {
                                                 margin: 0 0 12px;
                                 }
+                                .btn {
+                                                width: 100%;
+                                                border: 1px solid #425471;
+                                                border-radius: 10px;
+                                                background: #2a2f42;
+                                                color: #f0f5ff;
+                                                padding: 10px 12px;
+                                                font-size: 0.95rem;
+                                                cursor: pointer;
+                                                margin-bottom: 10px;
+                                }
+                                .btn-row {
+                                                display: grid;
+                                                grid-template-columns: 1fr 1fr;
+                                                gap: 10px;
+                                                margin-bottom: 10px;
+                                }
                                 .range-wrap label {
                                                 display: block;
                                                 font-size: 0.86rem;
@@ -449,10 +466,15 @@ def _dashboard_html() -> str:
                                         <label for=\"approverInput\">Policy approver</label>
                                         <input id=\"approverInput\" type=\"text\" value=\"supervisor\" />
                                 </div>
+                                <div class=\"btn-row\">
+                                        <button class=\"btn\" type=\"button\">Submit Policy Change</button>
+                                        <button class=\"btn\" type=\"button\">Save Policy Directly</button>
+                                </div>
                                 <div class=\"ctrl-group\">
                                         <label for=\"versionsInput\">Policy versions</label>
                                         <select id=\"versionsInput\"><option selected>policy_20260413_210449.json</option></select>
                                 </div>
+                                <button class=\"btn\" type=\"button\">Rollback Selected Version</button>
 
                                 <div class=\"s-heading\">Trust Layer</div>
                                 <div class=\"range-wrap\"><label for=\"activeStart\">Active hour start</label><div id=\"activeStartVal\" class=\"range-val\">0</div><input id=\"activeStart\" type=\"range\" min=\"0\" max=\"23\" value=\"0\" /></div>
@@ -471,16 +493,21 @@ def _dashboard_html() -> str:
                                 </div>
 
                                 <div class=\"s-heading\">Email Alerts (Real-Time Intrusion)</div>
-                                <div class=\"ctrl-group\"><label><input type=\"checkbox\" /> Enable email alerts</label></div>
+                                <div class=\"ctrl-group\"><label><input type=\"checkbox\" /> Enable intrusion email</label></div>
                                 <div class=\"ctrl-group\"><label for=\"smtpHost\">SMTP Host</label><input id=\"smtpHost\" type=\"text\" value=\"smtp.gmail.com\" /></div>
                                 <div class=\"ctrl-group\"><label for=\"smtpPort\">SMTP Port</label><input id=\"smtpPort\" type=\"number\" value=\"587\" /></div>
                                 <div class=\"ctrl-group\"><label for=\"senderEmail\">Sender Email</label><input id=\"senderEmail\" type=\"text\" value=\"\" /></div>
                                 <div class=\"ctrl-group\"><label for=\"senderPass\">Sender App Password</label><input id=\"senderPass\" type=\"password\" value=\"\" /></div>
                                 <div class=\"ctrl-group\"><label for=\"receiverEmail\">Receiver Email</label><input id=\"receiverEmail\" type=\"text\" value=\"\" /></div>
                                 <div class=\"range-wrap\"><label for=\"emailCooldown\">Email cooldown (seconds)</label><div id=\"emailCooldownVal\" class=\"range-val\">60</div><input id=\"emailCooldown\" type=\"range\" min=\"10\" max=\"300\" value=\"60\" /></div>
+                                <div class=\"ctrl-group\"><label><input type=\"checkbox\" checked /> Attach captured intrusion image</label></div>
+                                <button class=\"btn\" type=\"button\">Send Test Email</button>
 
                                 <div class=\"s-title\">PINN is active for sensor/energy prediction.</div>
+                                <div class=\"ctrl-group\"><label><input type=\"checkbox\" checked /> Enable object detection</label></div>
+                                <div class=\"ctrl-group\"><label><input type=\"checkbox\" /> Person-only detection mode</label></div>
                                 <div class=\"ctrl-group\"><label for=\"detProfile\">Detection profile</label><select id=\"detProfile\"><option selected>Comprehensive</option><option>Balanced</option><option>Lightweight</option></select></div>
+                                <div class=\"ctrl-group\"><label><input type=\"checkbox\" checked /> Detect all objects (all YOLO classes)</label></div>
                                 <div class=\"range-wrap\"><label for=\"detConf\">Detection confidence threshold</label><div id=\"detConfVal\" class=\"range-val\">0.15</div><input id=\"detConf\" type=\"range\" min=\"0.10\" max=\"0.80\" step=\"0.01\" value=\"0.15\" /></div>
                                 <div class=\"s-title\">Class-Specific Thresholds</div>
                                 <div class=\"range-wrap\"><label for=\"personThr\">Person threshold</label><div id=\"personThrVal\" class=\"range-val\">0.25</div><input id=\"personThr\" type=\"range\" min=\"0.10\" max=\"0.90\" step=\"0.01\" value=\"0.25\" /></div>
@@ -499,12 +526,28 @@ def _dashboard_html() -> str:
                                 <div class=\"s-title\">Current scale: 0.009091 m/px</div>
                                 <div class=\"ctrl-group\"><label for=\"fireModel\">Optional Fire Model Path (.pt)</label><input id=\"fireModel\" type=\"text\" value=\"\" /></div>
                                 <div class=\"ctrl-group\"><label for=\"videoSource\">Video Source</label><select id=\"videoSource\"><option selected>Webcam</option><option>Upload Video</option></select></div>
+                                <div class=\"btn-row\">
+                                        <button class=\"btn\" type=\"button\">Start</button>
+                                        <button class=\"btn\" type=\"button\">Stop</button>
+                                </div>
+                                <button class=\"btn\" type=\"button\">Reset History</button>
                                 <div class=\"s-title\">Dataset Controls</div>
                                 <div class=\"ctrl-group\"><label for=\"datasets\">Select datasets for training</label><select id=\"datasets\"><option selected>data\\raw_sensor_energy_1000.csv</option></select></div>
                                 <div class=\"ctrl-group\"><label for=\"datasetUpload\">Upload dataset CSV</label><input id=\"datasetUpload\" type=\"file\" /></div>
+                                <button class=\"btn\" type=\"button\">Train PINN with Selected Datasets</button>
+                                <div class=\"ctrl-group\"><label><input type=\"checkbox\" checked /> Enable sound alert</label></div>
+                                <button class=\"btn\" type=\"button\">Train with 1000 Raw Samples</button>
+                                <button class=\"btn\" type=\"button\">Download Monitoring Report</button>
+                                <button class=\"btn\" type=\"button\">Generate Evaluation Report</button>
                                 <div class=\"s-title\">Scenario Recorder</div>
                                 <div class=\"ctrl-group\"><label for=\"scenarioName\">Scenario name</label><input id=\"scenarioName\" type=\"text\" value=\"\" /></div>
                                 <div class=\"ctrl-group\"><label for=\"markText\">Mark event text</label><input id=\"markText\" type=\"text\" value=\"\" /></div>
+                                <div class=\"btn-row\">
+                                        <button class=\"btn\" type=\"button\">Start Scenario</button>
+                                        <button class=\"btn\" type=\"button\">Stop Scenario</button>
+                                </div>
+                                <button class=\"btn\" type=\"button\">Mark Event</button>
+                                <button class=\"btn\" type=\"button\">Export Review Bundle</button>
                                 <div class=\"s-title\">System Status: STOPPED</div>
                                 <div class=\"s-title\">Deployment</div>
                                 <div style=\"color:#cfe0ff;font-size:0.9rem;\">Vercel dashboard mirror of your monitoring data.</div>
