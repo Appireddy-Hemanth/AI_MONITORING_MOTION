@@ -223,6 +223,16 @@ def _dashboard_html() -> str:
                                                 gap: 10px;
                                                 margin-bottom: 10px;
                                 }
+                                .action-msg {
+                                                margin-top: 6px;
+                                                margin-bottom: 8px;
+                                                color: #b9ccee;
+                                                font-size: 0.84rem;
+                                                border: 1px solid #1e4a74;
+                                                border-radius: 8px;
+                                                padding: 8px;
+                                                background: rgba(8, 23, 41, 0.45);
+                                }
                                 .range-wrap label {
                                                 display: block;
                                                 font-size: 0.86rem;
@@ -548,7 +558,8 @@ def _dashboard_html() -> str:
                                 </div>
                                 <button class=\"btn\" type=\"button\">Mark Event</button>
                                 <button class=\"btn\" type=\"button\">Export Review Bundle</button>
-                                <div class=\"s-title\">System Status: STOPPED</div>
+                                <div class=\"s-title\" id=\"systemStatus\">System Status: STOPPED</div>
+                                <div class=\"action-msg\" id=\"actionMsg\">Ready.</div>
                                 <div class=\"s-title\">Deployment</div>
                                 <div style=\"color:#cfe0ff;font-size:0.9rem;\">Vercel dashboard mirror of your monitoring data.</div>
                         </aside>
@@ -735,6 +746,32 @@ def _dashboard_html() -> str:
                                 }
 
                                 async function boot() {
+                                                function showAction(msg) {
+                                                                const n = document.getElementById('actionMsg');
+                                                                if (n) {
+                                                                                n.textContent = msg;
+                                                                }
+                                                }
+
+                                                function setSystemRunning(isRunning) {
+                                                                const s = document.getElementById('systemStatus');
+                                                                if (s) {
+                                                                                s.textContent = isRunning ? 'System Status: RUNNING' : 'System Status: STOPPED';
+                                                                }
+                                                }
+
+                                                function downloadTextFile(filename, content, mimeType) {
+                                                                const blob = new Blob([content], { type: mimeType || 'text/plain' });
+                                                                const url = URL.createObjectURL(blob);
+                                                                const a = document.createElement('a');
+                                                                a.href = url;
+                                                                a.download = filename;
+                                                                document.body.appendChild(a);
+                                                                a.click();
+                                                                a.remove();
+                                                                URL.revokeObjectURL(url);
+                                                }
+
                                                 const rangePairs = [
                                                                 ['cooldownRange', 'cooldownVal'],
                                                                 ['intrusionRange', 'intrusionVal'],
@@ -775,8 +812,90 @@ def _dashboard_html() -> str:
                                                 document.querySelectorAll('.nav-btn').forEach(btn => {
                                                                 btn.addEventListener('click', () => setPage(btn.dataset.page));
                                                 });
+
+                                                document.querySelectorAll('button.btn').forEach(btn => {
+                                                                btn.addEventListener('click', async () => {
+                                                                                const label = (btn.textContent || '').trim();
+                                                                                if (label === 'Start') {
+                                                                                                setSystemRunning(true);
+                                                                                                showAction('Monitoring started.');
+                                                                                                return;
+                                                                                }
+                                                                                if (label === 'Stop') {
+                                                                                                setSystemRunning(false);
+                                                                                                showAction('Monitoring stopped.');
+                                                                                                return;
+                                                                                }
+                                                                                if (label === 'Reset History') {
+                                                                                                const body = document.getElementById('alertsBody');
+                                                                                                if (body) {
+                                                                                                                body.innerHTML = '<tr><td colspan="5">History reset in dashboard view.</td></tr>';
+                                                                                                }
+                                                                                                showAction('Dashboard history reset.');
+                                                                                                return;
+                                                                                }
+                                                                                if (label === 'Send Test Email') {
+                                                                                                const sender = (document.getElementById('senderEmail') || {}).value || '';
+                                                                                                const receiver = (document.getElementById('receiverEmail') || {}).value || '';
+                                                                                                if (!sender || !receiver) {
+                                                                                                                showAction('Test email failed: sender/receiver email required.');
+                                                                                                } else {
+                                                                                                                showAction('Test email request simulated successfully.');
+                                                                                                }
+                                                                                                return;
+                                                                                }
+                                                                                if (label === 'Download Monitoring Report') {
+                                                                                                const summaryRes = await fetch('/api/summary', { cache: 'no-store' });
+                                                                                                const summary = await summaryRes.json();
+                                                                                                const alertsRes = await fetch('/api/alerts', { cache: 'no-store' });
+                                                                                                const alerts = await alertsRes.json();
+                                                                                                let csv = 'metric,value\\n';
+                                                                                                Object.keys(summary).forEach(k => {
+                                                                                                                csv += `${k},${String(summary[k]).replace(/,/g, ' ')}\\n`;
+                                                                                                });
+                                                                                                csv += '\\n';
+                                                                                                csv += 'timestamp,code,severity,risk_score,message\\n';
+                                                                                                (alerts || []).forEach(a => {
+                                                                                                                csv += `${a.timestamp || ''},${a.code || ''},${a.severity || ''},${a.risk_score || ''},${String(a.message || '').replace(/,/g, ' ')}\\n`;
+                                                                                                });
+                                                                                                downloadTextFile('monitoring_report.csv', csv, 'text/csv');
+                                                                                                showAction('Monitoring report downloaded.');
+                                                                                                return;
+                                                                                }
+                                                                                if (label === 'Export Review Bundle') {
+                                                                                                const payload = {
+                                                                                                                exported_at: new Date().toISOString(),
+                                                                                                                site: (document.getElementById('siteInput') || {}).value || 'default-site',
+                                                                                                                shift: (document.getElementById('shiftInput') || {}).value || 'day',
+                                                                                                                risk_profile: (document.getElementById('riskInput') || {}).value || 'normal',
+                                                                                                };
+                                                                                                downloadTextFile('review_bundle.json', JSON.stringify(payload, null, 2), 'application/json');
+                                                                                                showAction('Review bundle exported.');
+                                                                                                return;
+                                                                                }
+                                                                                if (label === 'Generate Evaluation Report') {
+                                                                                                await Promise.all([loadSummary(), loadAlerts()]);
+                                                                                                showAction('Evaluation summary refreshed.');
+                                                                                                return;
+                                                                                }
+                                                                                if (label === 'Train PINN with Selected Datasets' || label === 'Train with 1000 Raw Samples') {
+                                                                                                showAction(label + ' triggered (dashboard simulation).');
+                                                                                                return;
+                                                                                }
+                                                                                if (label === 'Start Scenario' || label === 'Stop Scenario' || label === 'Mark Event') {
+                                                                                                showAction(label + ' recorded.');
+                                                                                                return;
+                                                                                }
+                                                                                if (label === 'Submit Policy Change' || label === 'Save Policy Directly' || label === 'Rollback Selected Version') {
+                                                                                                showAction(label + ' action captured.');
+                                                                                                return;
+                                                                                }
+                                                                                showAction(label + ' clicked.');
+                                                                });
+                                                });
                                                 setPage('review');
                                                 await Promise.all([loadSummary(), loadAlerts()]);
+                                                showAction('Dashboard loaded successfully.');
                                 }
                                 boot();
                 </script>
